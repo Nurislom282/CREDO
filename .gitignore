@@ -42,3 +42,6 @@ next-env.d.ts
 
 # agent tooling vendored locally, not part of the site
 /.agents
+
+# firebase local cache and CLI state
+/.firebase
