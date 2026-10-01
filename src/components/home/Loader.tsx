@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 const INTRO_FRAMES = [
   "/images/intro/chip-1.png",
-  "/images/intro/chip-2.jpg",
-  "/images/intro/chip-3.jpg",
+  "/images/intro/chip-2.png",
+  "/images/intro/chip-3.png",
   "/images/intro/chip-4.jpg",
   "/images/intro/chip-5.png",
   "/images/intro/chip-6.png",

@@ -24,6 +24,11 @@ const grotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Bunyod Mahmudov - Product Designer",
   description: "Product designer and studio, Pamidor.",
+  icons: {
+    icon: "/logos/CDlogo.jpg",
+    shortcut: "/logos/CDlogo.jpg",
+    apple: "/logos/CDlogo.jpg",
+  },
 };
 
 /**

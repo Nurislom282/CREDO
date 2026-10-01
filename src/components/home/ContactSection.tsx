@@ -48,7 +48,7 @@ export function ContactSection() {
   };
 
   return (
-    <section className="relative bg-canvas">
+    <section id="contact" className="relative bg-canvas">
       <section className="relative flex min-h-[100svh] w-full flex-col justify-center overflow-hidden py-16 lg:py-[7svh]">
         <video
           aria-hidden="true"

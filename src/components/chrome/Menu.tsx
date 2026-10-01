@@ -17,7 +17,7 @@ import { useRouteTransition } from "@/components/providers/RouteTransition";
 const LINKS = [
   { href: "/#top", label: "Home" },
   { href: "/#projects", label: "Work" },
-  { href: "/art-lab", label: "Art Lab" },
+  { href: "/#contact", label: "FAQ" },
 ] as const;
 
 type MenuApi = {
@@ -148,12 +148,12 @@ function MenuOverlay() {
               viewport, not as tall as its content. */}
           <div className="mt-10">
             <a
-              href="mailto:pamidordesign@gmail.com"
+              href="mailto:credodesignbruh@gmail.com"
               data-menu-item=""
               style={{ "--menu-i": LINKS.length } as CSSProperties}
               className="block py-2 text-body text-muted"
             >
-              PAMIDORDESIGN@GMAIL.COM
+              CREDODESIGNBRUH@GMAIL.COM
             </a>
           </div>
         </nav>
