@@ -22,8 +22,9 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Bunyod Mahmudov - Product Designer",
-  description: "Product designer and studio, Pamidor.",
+  title: "CREDO — Graphic Design Studio",
+  description:
+    "CREDO is Bunyod Mahmudov's graphic design studio: identities, brand and editorial work, design systems and 3D art direction.",
   icons: {
     icon: "/logos/CDlogo.jpg",
     shortcut: "/logos/CDlogo.jpg",
