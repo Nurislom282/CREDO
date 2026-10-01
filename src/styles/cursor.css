@@ -1,0 +1,69 @@
+/* =============================================================================
+   Custom crosshair cursor.
+
+   Pixel-art crosshair: 2px arms running to the sprite edge into an 8x8 hollow
+   centre box, drawn as pure rectangles with no antialiasing so the steps stay
+   crisp. Built on a 32x32 artboard and shipped at 1x and 2x.
+
+   Three variants:
+     - default   ink crosshair, on canvas
+     - light     canvas-coloured, for dark sections
+     - click     accent-coloured with the centre box closed into a solid pip
+
+   The hotspot is the centre of the figure (16 16 at 1x, 32 32 at 2x) so the
+   crosshair tracks the pointer exactly — the whole point of a crosshair, and
+   the opposite of the pen nib this replaced, whose hotspot sat at the nib tip.
+
+   <html data-cursor="down"> is set on pointerdown. data-cursor-invert is
+   declared on dark regions (#skillset, #start-project, footer). The `down`
+   rules intentionally out-specify the invert rules so a press always wins.
+   ============================================================================= */
+
+body,
+body * {
+  cursor:
+    url(/icons/cursor-crosshair-28.png) 16 16,
+    auto;
+  cursor:
+    -webkit-image-set(url("/icons/cursor-crosshair-28.png") 1x, url("/icons/cursor-crosshair-56.png") 2x) 16 16,
+    auto;
+}
+
+[data-cursor="down"] body,
+[data-cursor="down"] body * {
+  cursor:
+    url(/icons/cursor-crosshair-click-28.png) 16 16,
+    auto;
+  cursor:
+    -webkit-image-set(url("/icons/cursor-crosshair-click-28.png") 1x, url("/icons/cursor-crosshair-click-56.png") 2x) 16 16,
+    auto;
+}
+
+[data-cursor-invert],
+[data-cursor-invert] * {
+  cursor:
+    url(/icons/cursor-crosshair-light-28.png) 16 16,
+    auto;
+  cursor:
+    -webkit-image-set(url("/icons/cursor-crosshair-light-28.png") 1x, url("/icons/cursor-crosshair-light-56.png") 2x) 16 16,
+    auto;
+}
+
+[data-cursor="down"] [data-cursor-invert],
+[data-cursor="down"] [data-cursor-invert] * {
+  cursor:
+    url(/icons/cursor-crosshair-click-28.png) 16 16,
+    auto;
+  cursor:
+    -webkit-image-set(url("/icons/cursor-crosshair-click-28.png") 1x, url("/icons/cursor-crosshair-click-56.png") 2x) 16 16,
+    auto;
+}
+
+/* The crosshair is the affordance, so keep the native fallback for anyone
+   without a fine pointer (touch) and never let it be invisible. */
+@media (hover: none), (pointer: coarse) {
+  body,
+  body * {
+    cursor: auto;
+  }
+}

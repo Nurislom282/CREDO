@@ -1,0 +1,198 @@
+/* Every @keyframes used on the site, verbatim. Durations are supplied by the
+   component via `animation-duration` so the same curves serve many timings. */
+
+/* Track holds its content twice and shifts by exactly -50% => seamless loop. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Generic scroll-reveal / route-entry transform. */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(10 * var(--px)), 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Scroll-linked text spotlight: dim -> red flash -> settled ink.
+   The flash peaks at 30% so the eye reads a travelling "spark" down the line. */
+@keyframes char-wave {
+  from {
+    color: var(--wave-dim);
+    animation-timing-function: var(--ease-out-soft);
+  }
+  30% {
+    color: var(--wave-flash);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+  to {
+    color: var(--wave-lit);
+  }
+}
+
+/* Handwriting sweep: one-shot per character, staggered by --hwi. */
+@keyframes hw-sweep {
+  from {
+    color: var(--hw-base, currentColor);
+    animation-timing-function: var(--ease-out-soft);
+  }
+  45% {
+    color: var(--wave-flash);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+}
+
+@keyframes hw-appear {
+  from {
+    color: transparent;
+    animation-timing-function: var(--ease-out-soft);
+  }
+  45% {
+    color: var(--wave-flash);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+}
+
+/* --- Loader (home only) --- */
+@keyframes loader-letter-in {
+  from {
+    transform: translate3d(0, 110%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes loader-letter-out {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, -60%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes loader-chip {
+  from {
+    transform: translateX(-50%) scale(0.82);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* --- The door -------------------------------------------------------
+   Four coupled curves on a 5s infinite loop. The door is shut at rest,
+   swings open across 8%->28% (~1s), holds briefly, then closes by 36%.
+   --door-o is the travel distance (half the element width), set by JS.   */
+
+@keyframes door-shut {
+  0% {
+    transform: scaleX(1);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  7% {
+    opacity: 1;
+  }
+  8% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  28% {
+    transform: scaleX(0);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  29% {
+    opacity: 1;
+  }
+  36% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes door-slide {
+  0% {
+    transform: translateX(0);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  8% {
+    transform: translateX(calc(-1 * var(--door-o, 0px)));
+  }
+  28% {
+    transform: translateX(calc(-1 * var(--door-o, 0px)));
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  36% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes door-grow {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  1% {
+    opacity: 1;
+  }
+  8% {
+    transform: scaleX(1);
+  }
+  28% {
+    transform: scaleX(1);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  35% {
+    opacity: 1;
+  }
+  36% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes door-give {
+  0% {
+    transform: translateX(0);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  8% {
+    transform: translateX(var(--door-o, 0px));
+  }
+  28% {
+    transform: translateX(var(--door-o, 0px));
+    animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1);
+  }
+  36% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

@@ -1,0 +1,124 @@
+/* Raw palette + scale primitives. Consumed directly via var() in hand-written CSS. */
+:root {
+  /* The whole site is authored against a 1728x680 artboard and scaled by --px. */
+  --px: clamp(1px, min(100vw / 1728, 100vh / 680), 1.6px);
+
+  --canvas: rgb(239 238 235);
+  --ink: rgb(10 10 10);
+  --night: rgb(13 13 11);
+  --accent: rgb(209 36 36);
+
+  /* Secondary copy. --muted sits on canvas; --night-muted is its dark-surface
+     twin, used inside the night card (form labels, the "leave your details" tag).
+     The night value is lighter, not just inverted: a straight flip of 107 104 98
+     reads as muddy grey-brown against #0D0D0B. */
+  --muted: rgb(107 104 98);
+  --night-muted: rgb(158 153 145);
+
+  /* Hairlines. --rule sits on canvas, --night-hr is its dark-surface twin. */
+  --rule: rgb(204 201 196);
+  --night-hr: #918e89;
+  --night-chip: hsla(0, 0%, 40%, 0.1);
+
+  /* Scroll-lit text ("char-wave"). Lit text is a warm red before settling to ink. */
+  --wave-dim: hsla(0, 0%, 4%, 0.2);
+  --wave-flash: #d12424;
+  --wave-lit: #0a0a0a;
+
+  /* Shared easing vocabulary. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Expose the palette + fonts to Tailwind utilities (bg-canvas, text-ink, font-funnel, ...).
+   `inline` is deliberate: these are compile-time substitutions, so the utilities
+   reference the underlying var directly instead of emitting a second variable.
+
+   Curvings are NOT in @theme -- a `--ease-out-soft: var(--ease-out-soft)`
+   entry would be self-referential. They stay plain :root vars and are surfaced
+   to JSX as custom utilities instead (see globals.css). */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-ink: var(--ink);
+  --color-night: var(--night);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-night-muted: var(--night-muted);
+  --color-rule: var(--rule);
+
+  --font-funnel: var(--font-funnel-display), "Helvetica Neue", Arial, sans-serif;
+  --font-archivo: var(--font-archivo-face), "Helvetica Neue", Arial, sans-serif;
+  --font-grotesk: var(--font-space-grotesk), "Helvetica Neue", Arial, sans-serif;
+}
+
+/* --- Type scale -----------------------------------------------------------
+   Seven steps, each a clamp() between a floor and a ceiling so the site stays
+   legible on a phone without the desktop sizes collapsing. The vw term is what
+   makes them fluid; the rem bounds are what stop them becoming unreadable at
+   the extremes.
+
+   Declared with @utility rather than as plain classes so Tailwind only emits the
+   steps a page actually uses, and so they compose with variants like
+   `lg:text-body` — which the skillset index relies on to switch step at the
+   same breakpoint the layout switches to its 5-column grid. */
+@utility text-display {
+  font-size: clamp(2.25rem, 6.944vw, 6.25rem);
+  line-height: 0.88;
+  letter-spacing: -0.03em;
+}
+
+/* Below `sm` the 6.944vw ramp bottoms out at the 2.25rem clamp floor, which
+   leaves the name at 36px and the hero looking empty. The original sizes the
+   name off the available width instead, so it keeps filling the line as the
+   viewport narrows. Keyed on the same attribute so the component stays clean. */
+@media (max-width: 639px) {
+  [data-hero-name] {
+    font-size: min(calc((100vw - 48px) / 3.758), 6.25rem);
+  }
+}
+
+@utility text-section {
+  font-size: clamp(2.25rem, 7.222vw, 6.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* The project titles sit between the section and subhead steps: large enough
+   to carry a row on its own, small enough that four of them fit the viewport. */
+@utility text-project {
+  font-size: clamp(1.625rem, 4.167vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+
+@utility text-subhead {
+  font-size: clamp(1.3125rem, 2.778vw, 2.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+@utility text-lead {
+  font-size: clamp(1.3125rem, 2.778vw, 2.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+@utility text-body-lg {
+  font-size: clamp(1.0625rem, 1.25vw, 1.125rem);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+@utility text-body {
+  font-size: clamp(0.9375rem, 1.111vw, 1rem);
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+
+@utility text-label {
+  font-size: clamp(0.6875rem, 0.833vw, 0.75rem);
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+}

@@ -1,0 +1,351 @@
+/* =============================================================================
+   Motion primitives. Each block is a small, self-contained behaviour that a
+   component opts into by setting data-attributes. Durations live in CSS so
+   they stay inspectable/devtools-tweakable exactly like the original.
+   ============================================================================= */
+
+/* --- Scroll reveal -------------------------------------------------------
+   The observer flips data-reveal waiting -> shown. `waiting` deliberately has
+   transition:none so an already-visible element never animates on hydration. */
+.reveal {
+  transition:
+    transform 0.7s var(--ease-out-expo),
+    opacity 0.7s var(--ease-out-expo);
+}
+
+[data-reveal="waiting"] {
+  transform: translate3d(0, calc(13 * var(--px)), 0);
+  transition: none;
+}
+
+[data-reveal="shown"] {
+  transform: none;
+}
+
+/* --- Handwriting sweep ---------------------------------------------------
+   Wrap text in [data-hw]; each glyph is a [data-hw-char] carrying its own
+   --hwi index. Hover (or data-hw-on for a permanently-lit line) fires a
+   one-shot colour sweep front-to-back at 16ms per character.
+
+   Gated on no-preference and hover:hover, as production does — the whole
+   behaviour is a pointer flourish, so touch and reduced-motion get plain text.
+
+   Inside a [data-hw-appear] container the glyphs start transparent and are
+   only painted once that container is hovered or lit, which is what makes the
+   project metadata line and the cover overlay chips sweep in instead of
+   sitting pre-painted. The opacity reset is !important because the metadata
+   carries its own opacity state on the same element; the reveal is carried by
+   glyph colour, not element opacity. */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  [data-hw]:is(:hover, [data-hw-on]) [data-hw-char] {
+    animation: hw-sweep 0.4s both;
+    animation-delay: calc(var(--hwi) * 16ms);
+  }
+
+  [data-hw-appear] {
+    opacity: 1 !important;
+  }
+
+  [data-hw-appear] [data-hw-char] {
+    transition: color 0.2s linear;
+  }
+
+  [data-hw-appear]:not(:hover):not([data-hw-on]) [data-hw-char] {
+    color: transparent;
+  }
+
+  [data-hw-appear]:is(:hover, [data-hw-on]) [data-hw-char] {
+    animation: hw-appear 0.4s both;
+    animation-delay: calc(var(--hwi) * 16ms);
+  }
+}
+
+/* --- Marquee -------------------------------------------------------------
+   The track renders its children twice; the second copy is aria-hidden and
+   only exists so translateX(-50%) lands on an identical layout. */
+.marquee-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee var(--marquee-duration, 28s) linear infinite;
+}
+
+.marquee-wrapper:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* --- The door ------------------------------------------------------------
+   Two different doors share one 5s loop.
+
+   1. data-door — a physical two-panel door. .door-o and .door-r are the two
+      leaves; they part, and .door-o additionally pinches to nothing
+      (door-shut) so the motion reads as a door rather than sliding letters.
+
+   2. data-door-open — the wordplay. "Dor" is split as D + <.door-add> + r,
+      where .door-add is a ZERO-WIDTH inline-block whose ::before supplies the
+      letter "o". Because the box is 0-width it occupies no layout space; the
+      overflowing glyph is revealed by scaleX() with transform-origin:left,
+      while .door-give (the "r") slides right by exactly one "o" width to make
+      room. So the name oscillates Dor -> Door on a loop.
+
+   --door-o is that one-"o" width, measured at runtime because it depends on the
+   font and viewport. Recomputed via ResizeObserver. */
+.door-add {
+  display: inline-block;
+  width: 0;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.door-add::before {
+  content: "o";
+}
+
+[data-door] .door-o {
+  transform-origin: left;
+  animation: door-shut 5s infinite;
+}
+
+[data-door] .door-r {
+  animation: door-slide 5s infinite;
+}
+
+[data-door-open] .door-add {
+  animation: door-grow 5s infinite;
+}
+
+[data-door-open] .door-give {
+  animation: door-give 5s infinite;
+}
+
+/* --- Hero 3D entrance ----------------------------------------------------
+   Gated on <html data-loading>. The blocking inline script sets the attribute
+   before paint, so the hero renders pre-transformed and transparent; removing
+   the attribute hands the elements back to the transition below, which carries
+   them to identity over 0.95s. No JS, no layout thrash.
+
+   The two selectors are deliberate. The portrait is one element, while the name
+   animates line by line, so the lines take the transition individually and
+   --h3d-i staggers them. Under [data-loading] the transition is dropped
+   outright, otherwise the browser would animate out of the pre-state on first
+   paint rather than holding it until the loader clears. */
+[data-hero-3d-lines] > *,
+[data-hero-3d] {
+  transform-origin: 50% 100%;
+  transition:
+    transform 0.95s var(--ease-out-expo) calc(var(--h3d, 0ms) + var(--h3d-i, 0ms)),
+    opacity 0.7s var(--ease-in-out-quart) calc(var(--h3d, 0ms) + var(--h3d-i, 0ms));
+}
+
+[data-hero-3d="portrait"] {
+  transform-origin: 60% 60%;
+}
+
+[data-loading] [data-hero-3d="portrait"] {
+  transform:
+    perspective(calc(1400 * var(--px)))
+    rotateY(-10deg)
+    rotateX(6deg)
+    translateY(calc(34 * var(--px)))
+    scale(1.06);
+}
+
+/* Only the block-level [data-hero-3d] elements hide out; the name lines stay
+   legible while tilted back, exactly as the original does. */
+[data-loading] [data-hero-3d] {
+  opacity: 0;
+  transition: none;
+}
+
+[data-loading] [data-hero-3d-lines] > * {
+  transform:
+    perspective(calc(900 * var(--px)))
+    rotateX(44deg)
+    translateY(calc(46 * var(--px)));
+}
+
+[data-hero-3d-lines] > :nth-child(2) {
+  --h3d-i: 90ms;
+}
+
+[data-hero-3d-lines] > :nth-child(3) {
+  --h3d-i: 180ms;
+}
+
+/* --- Scroll-lit text (bio) ----------------------------------------------
+   The travel height lives on BioWave's own wrapper element, which is what
+   carries the sticky child. Nothing extra is needed here: the paragraph is
+   ordinary flow content and keeps its natural height, so the text sits at the
+   vertical centre of the pinned viewport instead of being stretched to fill the
+   whole travel range. */
+
+[data-wave] [data-char] {
+  color: var(--wave-dim);
+  transition: color 0.05s linear;
+}
+
+/* Presence-only, not [data-lit="true"]: the marker is set with an empty value
+   (`setAttribute("data-lit", "")`), so an explicit-value selector would never
+   match and the sweep would never light. */
+[data-wave] [data-char][data-lit] {
+  animation: char-wave 0.6s both;
+}
+
+/* --- Route curtain -------------------------------------------------------
+   FSM: idle -> cover -> (router.push) -> reveal -> idle.
+   `idle` drops the transition so the panel cannot animate on mount. */
+[data-curtain] {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--night);
+  pointer-events: none;
+  will-change: transform;
+}
+
+[data-curtain="cover"] {
+  transform: translateZ(0);
+  transition: transform 0.667s var(--ease-in-out-soft);
+}
+
+[data-curtain="reveal"] {
+  transform: translate3d(0, -100%, 0);
+  transition: transform 0.754s var(--ease-out-soft);
+}
+
+[data-curtain="idle"] {
+  transform: translate3d(0, -100%, 0);
+  transition: none;
+}
+
+/* --- Menu ----------------------------------------------------------------
+   [data-menu] slides the canvas over the page from the right while Lenis is
+   stopped. It parks off-canvas rather than merely hiding, so the closed panel
+   is never painted; `visibility` still flips instantly in both directions,
+   which is why the slide-out itself is not seen. */
+[data-menu] {
+  position: absolute;
+  inset: 0;
+  background: var(--canvas);
+  transform: translate3d(100%, 0, 0);
+  transition:
+    transform 0.42s var(--ease-in-out-soft),
+    visibility 0s linear 0.42s;
+  visibility: hidden;
+  will-change: transform;
+}
+
+[data-menu][data-state="open"] {
+  transform: translate3d(0, 0, 0);
+  visibility: visible;
+  transition:
+    transform 0.62s var(--ease-out-soft),
+    visibility 0s linear 0s;
+}
+
+/* Each item slides up out of its own line box. 105% is deliberate: it clears the
+   item's full height including its vertical padding, so nothing peeks through. */
+[data-menu-item] {
+  opacity: 0;
+  transform: translate3d(0, 105%, 0);
+  transition:
+    opacity 0.64s var(--ease-out-soft),
+    transform 0.64s var(--ease-out-soft);
+}
+
+[data-menu][data-state="open"] [data-menu-item] {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(180ms + var(--menu-i) * 55ms);
+}
+
+/* --- Loader --------------------------------------------------------------
+   Home only. Letters ride up out of a mask, the "I" glyph is replaced by a
+   chip that widens open to reveal a stack of intro frames. */
+[data-intro] {
+  transition: opacity 0.42s linear;
+}
+
+[data-intro][data-state="out"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The chip is a window, not a container that grows with its content: its height
+   is fixed in the wordmark's em so the frames inside always have a box to fill.
+   Deriving that height from the animating width instead leaves every frame at
+   zero height for the first half second, which is what next/image's "fill with a
+   height value of 0" warning reports.
+
+   The window and the frame box are both sized in the wordmark's em so they scale
+   with it. The frame is deliberately a little narrower than the window, which
+   leaves the margin production has either side of the image. */
+[data-intro-chip] {
+  height: 1.508em;
+  width: 0;
+  transition: width 300ms var(--ease-out-soft);
+}
+
+[data-intro-chip][data-open="true"] {
+  width: 1.5555556em;
+}
+
+/* Centred on the window's midpoint rather than laid out from its left edge, so
+   the -50% the loader-chip keyframes apply lands the frame in the middle of the
+   opening instead of half of it hanging out to the left. */
+/* Each frame carries its own pose as custom properties (see Loader.tsx) and
+   transitions between a resting, slightly-collapsed version of that pose and the
+   pose itself. The active frame therefore travels into its own size and tilt as
+   it fades up, and sinks back toward the resting pose as it fades out, so the
+   crossfade reads as one composition changing size into the next rather than
+   nine static rectangles swapping opacity. */
+[data-intro-chip-inner] > * {
+  opacity: 0;
+  transform: translateY(var(--pose-lift)) rotate(calc(var(--pose-turn) * 0.35))
+    scale(calc(var(--pose-scale) * 0.88));
+  transition:
+    opacity 150ms linear,
+    transform 620ms var(--ease-out-soft);
+}
+
+[data-intro-chip-inner] > [data-on="true"] {
+  opacity: 1;
+  transform: translateY(var(--pose-lift)) rotate(var(--pose-turn)) scale(var(--pose-scale));
+}
+
+/* --- Reduced motion ------------------------------------------------------
+   Lenis is never instantiated under this query, so these rules are the
+   fallback for the whole site. */
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+
+
+  [data-door] .door-o,
+  [data-door] .door-r,
+  [data-door-open] .door-add,
+  [data-door-open] .door-give {
+    animation: none;
+  }
+
+  [data-hero-3d] {
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

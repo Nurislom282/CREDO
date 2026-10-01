@@ -1,0 +1,61 @@
+# Netlify build configuration.
+#
+# The site is fully static — the five case studies come from generateStaticParams
+# and the rest are plain sections — so next build runs with output: "export"
+# (see next.config.ts) and Netlify serves `out/` with no Node process and no
+# adapter. images.unoptimized has to be set for the same reason: the image
+# optimiser is a server route that would not exist here.
+
+[build]
+  command = "pnpm build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # pnpm is pinned by the packageManager field in package.json; declaring it here
+  # stops Netlify falling back to npm and resolving a different lockfile.
+  PNPM_VERSION = "10.34.5"
+
+# The role each page is playing in a designer portfolio's navigation, so the file
+# serves the right X-Robots-Tag and the sitemap has real titles.
+[[headers]]
+  for = "/"
+  [headers.values]
+    X-Robots-Tag = "index, follow"
+
+[[headers]]
+  for = "/work/*"
+  [headers.values]
+    X-Robots-Tag = "index, follow"
+
+# Fingerprinted build output is safe to cache forever; the HTML entry points are
+# not, or clients would keep serving a stale document after a deploy.
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The build writes pretty URLs as .html files, so both the clean URL (/work/shoez)
+# and the file it resolves to (/work/shoez.html) need revalidation. *.html only
+# matches the root, hence the second rule for the nested case-study pages.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/work/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Same reasoning for public assets: names are not fingerprinted, so they get a
+# short cache with revalidation rather than an immutable one.
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/videos/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
